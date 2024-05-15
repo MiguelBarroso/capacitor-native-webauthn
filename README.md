@@ -7,6 +7,7 @@ PassKey
 
 ```bash
 npm install @darkedges/capacitor-native-webauthn
+npm install @adamjbradley/capacitor-native-webauthn
 npx cap sync
 ```
 
