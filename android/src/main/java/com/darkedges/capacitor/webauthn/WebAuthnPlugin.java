@@ -2,7 +2,6 @@ package com.darkedges.capacitor.webauthn;
 
 import android.os.CancellationSignal;
 import android.util.Log;
-
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.credentials.CreateCredentialResponse;
 import androidx.credentials.CreatePublicKeyCredentialRequest;
@@ -22,18 +21,16 @@ import androidx.credentials.exceptions.CreateCredentialProviderConfigurationExce
 import androidx.credentials.exceptions.CreateCredentialUnknownException;
 import androidx.credentials.exceptions.GetCredentialException;
 import androidx.credentials.exceptions.publickeycredential.CreatePublicKeyCredentialDomException;
-
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
-
 import org.json.JSONException;
-
 
 @CapacitorPlugin(name = "WebAuthn")
 public class WebAuthnPlugin extends Plugin {
+
     private final WebAuthn implementation = new WebAuthn();
     ActivityResultLauncher createCredentialIntentLauncher;
 
@@ -67,14 +64,15 @@ public class WebAuthnPlugin extends Plugin {
 
         // Get webauthns from the user's public key credential provider.
         String clientDataHash = null;
-        GetPublicKeyCredentialOption getPublicKeyCredentialOption =
-                new GetPublicKeyCredentialOption(requestJson, null);
+        GetPublicKeyCredentialOption getPublicKeyCredentialOption = new GetPublicKeyCredentialOption(requestJson, null);
         GetCredentialRequest getCredRequest = new GetCredentialRequest.Builder()
-                .addCredentialOption(getPasswordOption)
-                .addCredentialOption(getPublicKeyCredentialOption)
-                .build();
+            .addCredentialOption(getPasswordOption)
+            .addCredentialOption(getPublicKeyCredentialOption)
+            .build();
         CancellationSignal cancellationSignal = null;
-        implementation.getCredentialManager().getCredentialAsync(
+        implementation
+            .getCredentialManager()
+            .getCredentialAsync(
                 getActivity(),
                 getCredRequest,
                 cancellationSignal,
@@ -92,7 +90,7 @@ public class WebAuthnPlugin extends Plugin {
                             String password = ((PasswordCredential) credential).getPassword();
                             firebaseSignInWithPassword(call, id, password);
                         } else {
-                            Log.v("TAG", "credential: "+credential.getData());
+                            Log.v("TAG", "credential: " + credential.getData());
                             handlePasskeyError(call, "Unexpected type of credential", credential.getClass().getName());
                         }
                     }
@@ -102,7 +100,7 @@ public class WebAuthnPlugin extends Plugin {
                         handlePasskeyError(call, "Sign in failed with exception", e.getMessage());
                     }
                 }
-        );
+            );
     }
 
     @PluginMethod
@@ -110,17 +108,23 @@ public class WebAuthnPlugin extends Plugin {
         String requestJson = call.getData().toString();
         String clientDataHash = null;
         CreatePublicKeyCredentialRequest createPublicKeyCredentialRequest =
-                // `requestJson` contains the request in JSON format. Uses the standard
-                // WebAuthn web JSON spec.
-                // `preferImmediatelyAvailableCredentials` defines whether you prefer
-                // to only use immediately available credentials, not  hybrid credentials,
-                // to fulfill this request. This value is false by default.
-                new CreatePublicKeyCredentialRequest(requestJson, null, true);
+            // `requestJson` contains the request in JSON format. Uses the standard
+            // WebAuthn web JSON spec.
+            // `preferImmediatelyAvailableCredentials` defines whether you prefer
+            // to only use immediately available credentials, not  hybrid credentials,
+            // to fulfill this request. This value is false by default.
+            new CreatePublicKeyCredentialRequest(requestJson, null, true);
         // Execute CreateCredentialRequest asynchronously to register credentials
         // for a user account. Handle success and failure cases with the result and
         // exceptions, respectively.
         CancellationSignal cancellationSignal = null;
-        implementation.getCredentialManager().createCredentialAsync(getActivity(), createPublicKeyCredentialRequest, cancellationSignal, getContext().getMainExecutor(),
+        implementation
+            .getCredentialManager()
+            .createCredentialAsync(
+                getActivity(),
+                createPublicKeyCredentialRequest,
+                cancellationSignal,
+                getContext().getMainExecutor(),
                 new CredentialManagerCallback<CreateCredentialResponse, CreateCredentialException>() {
                     @Override
                     public void onResult(CreateCredentialResponse result) {
@@ -132,26 +136,47 @@ public class WebAuthnPlugin extends Plugin {
                         if (e instanceof CreatePublicKeyCredentialDomException) {
                             // Handle the webauthn DOM errors thrown according to the
                             // WebAuthn spec.
-                            handlePasskeyError(call, "CreatePublicKeyCredentialDomException", ((CreatePublicKeyCredentialDomException)e).getMessage());
+                            handlePasskeyError(
+                                call,
+                                "CreatePublicKeyCredentialDomException",
+                                ((CreatePublicKeyCredentialDomException) e).getMessage()
+                            );
                         } else if (e instanceof CreateCredentialCancellationException) {
                             // The user intentionally canceled the operation and chose not
                             // to register the credential.
-                            handlePasskeyError(call, "CreateCredentialCancellationException", ((CreateCredentialCancellationException)e).getMessage());
+                            handlePasskeyError(
+                                call,
+                                "CreateCredentialCancellationException",
+                                ((CreateCredentialCancellationException) e).getMessage()
+                            );
                         } else if (e instanceof CreateCredentialInterruptedException) {
                             // Retry-able error. Consider retrying the call.
-                            handlePasskeyError(call, "CreateCredentialInterruptedException", ((CreateCredentialInterruptedException)e).getMessage());
+                            handlePasskeyError(
+                                call,
+                                "CreateCredentialInterruptedException",
+                                ((CreateCredentialInterruptedException) e).getMessage()
+                            );
                         } else if (e instanceof CreateCredentialProviderConfigurationException) {
                             // Your app is missing the provider configuration dependency.
                             // Most likely, you're missing the
                             // "credentials-play-services-auth" module.
-                            handlePasskeyError(call, "CreateCredentialProviderConfigurationException", ((CreateCredentialProviderConfigurationException)e).getMessage());
+                            handlePasskeyError(
+                                call,
+                                "CreateCredentialProviderConfigurationException",
+                                ((CreateCredentialProviderConfigurationException) e).getMessage()
+                            );
                         } else if (e instanceof CreateCredentialUnknownException) {
-                            handlePasskeyError(call, "CreateCredentialUnknownException", ((CreateCredentialUnknownException)e).getMessage());
+                            handlePasskeyError(
+                                call,
+                                "CreateCredentialUnknownException",
+                                ((CreateCredentialUnknownException) e).getMessage()
+                            );
                         } else {
                             handlePasskeyError(call, "Unexpected exception type", e.getMessage());
                         }
                     }
-                });
+                }
+            );
     }
 
     private void firebaseSignInWithPassword(PluginCall call, String id, String password) {

@@ -1,4 +1,5 @@
 # @darkedges/capacitor-native-webauthn
+# @adamjbradley/capacitor-native-webauthn@0.0.3
 
 PassKey
 
@@ -8,6 +9,9 @@ PassKey
 npm install @darkedges/capacitor-native-webauthn
 npx cap sync
 ```
+
+# Publish to NPM
+npm publish
 
 ## API
 

@@ -20,23 +20,23 @@ enum PasskeyError: String {
 
 class GetAppleSignInHandler: NSObject, ASAuthorizationControllerDelegate {
     var call: CAPPluginCall
-    var window : UIWindow;
-    
-    init(call: CAPPluginCall, window:UIWindow) {
+    var window: UIWindow
+
+    init(call: CAPPluginCall, window: UIWindow) {
         self.call = call
         self.window = window
         super.init()
     }
-    
+
     func register() {
         let _challenge: String = call.getString("challenge")!
         let _userid: String = call.getObject("user")?["id"] as! String
         let _username: String = call.getObject("user")?["name"] as! String
         let _rp: String = call.getObject("rp")?["id"] as! String
-        
+
         let challengeData = Data(base64urlEncoded: _challenge)!
         let useridData = Data(_userid.utf8)
-        
+
         let platformProvider = ASAuthorizationPlatformPublicKeyCredentialProvider(relyingPartyIdentifier: _rp)
         let platformKeyRequest = platformProvider.createCredentialRegistrationRequest(
             challenge: challengeData,
@@ -48,13 +48,13 @@ class GetAppleSignInHandler: NSObject, ASAuthorizationControllerDelegate {
         authController.presentationContextProvider = self
         authController.performRequests()
     }
-    
+
     func authenticate() {
         let _challenge: String = call.getString("challenge")!
         let _rp: String = call.getString("rpId")!
-        
+
         let challengeData = Data(base64urlEncoded: _challenge)!
-        
+
         let platformProvider = ASAuthorizationPlatformPublicKeyCredentialProvider(relyingPartyIdentifier: _rp)
         let platformKeyRequest = platformProvider.createCredentialAssertionRequest(challenge: challengeData)
         let authController = ASAuthorizationController(authorizationRequests: [platformKeyRequest])
@@ -62,16 +62,16 @@ class GetAppleSignInHandler: NSObject, ASAuthorizationControllerDelegate {
         authController.presentationContextProvider = self
         authController.performRequests()
     }
-    
+
     func getAuthenticatorAttachment(attachment: ASAuthorizationPublicKeyCredentialAttachment) -> String {
         var type = Attachment.PLATFORM.rawValue
         if attachment.rawValue == 1 {
             type = Attachment.CROSSPLATFORM.rawValue
         }
         return type
-            
-      }
-    
+
+    }
+
     func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
         switch authorization.credential {
         case let credentialRegistration as ASAuthorizationPlatformPublicKeyCredentialRegistration:
@@ -119,7 +119,7 @@ class GetAppleSignInHandler: NSObject, ASAuthorizationControllerDelegate {
             call.reject(PasskeyError.UNKNOWN.rawValue)
         }
     }
-    
+
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
         guard let authorizationError = error as? ASAuthorizationError else {
             call.reject(PasskeyError.UNKNOWN.rawValue)
@@ -127,20 +127,20 @@ class GetAppleSignInHandler: NSObject, ASAuthorizationControllerDelegate {
         }
         var errorDescription: String =
             switch authorizationError.code {
-                case .notInteractive:
-                    PasskeyError.USER_CANCELED_ERROR.rawValue
-                case .failed:
-                   PasskeyError.FAILED_ERROR.rawValue
-                case .invalidResponse:
-                     PasskeyError.INVALID_RESPONSE_ERROR.rawValue
-                case .notHandled:
-                    PasskeyError.NOT_HANDLED_ERROR.rawValue
-                case .canceled:
-                    PasskeyError.USER_CANCELED_ERROR.rawValue
-                case .unknown:
-                    PasskeyError.UNKNOWN.rawValue
-                default:
-                    PasskeyError.UNKNOWN.rawValue
+            case .notInteractive:
+                PasskeyError.USER_CANCELED_ERROR.rawValue
+            case .failed:
+                PasskeyError.FAILED_ERROR.rawValue
+            case .invalidResponse:
+                PasskeyError.INVALID_RESPONSE_ERROR.rawValue
+            case .notHandled:
+                PasskeyError.NOT_HANDLED_ERROR.rawValue
+            case .canceled:
+                PasskeyError.USER_CANCELED_ERROR.rawValue
+            case .unknown:
+                PasskeyError.UNKNOWN.rawValue
+            default:
+                PasskeyError.UNKNOWN.rawValue
             }
         call.reject(errorDescription)
     }
@@ -154,30 +154,30 @@ class GetAppleSignInHandler: NSObject, ASAuthorizationControllerDelegate {
 public class WebAuthnPlugin: CAPPlugin {
     private let implementation = WebAuthn()
     var signInHandler: GetAppleSignInHandler?
-    
+
     override public func load() {
-        implementation.setCredentialManager("hello");
+        implementation.setCredentialManager("hello")
     }
-    
+
     @objc func isWebAuthnAvailable(_ call: CAPPluginCall) {
         call.resolve([
             "isWebAuthnAvailable": implementation.isWebAuthnAvailable()
         ])
     }
-    
+
     @objc func isWebAuthnAutoFillAvailable(_ call: CAPPluginCall) {
         call.resolve([
             "isWebAuthnAutoFillAvailable": implementation.isWebAuthnAutoFillAvailable()
         ])
     }
-    
+
     @objc func startRegistration(_ call: CAPPluginCall) {
         DispatchQueue.main.async {
             self.signInHandler = GetAppleSignInHandler(call: call, window: (self.bridge?.webView?.window)!)
             self.signInHandler?.register()
         }
     }
-    
+
     @objc func startAuthentication(_ call: CAPPluginCall) {
         DispatchQueue.main.async {
             self.signInHandler = GetAppleSignInHandler(call: call, window: (self.bridge?.webView?.window)!)
@@ -190,6 +190,5 @@ public class WebAuthnPlugin: CAPPlugin {
 extension GetAppleSignInHandler: ASAuthorizationControllerPresentationContextProviding {
     public func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
         return self.window
-  }
+    }
 }
-

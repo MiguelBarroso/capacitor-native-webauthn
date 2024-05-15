@@ -21,7 +21,5 @@ export default {
     },
   ],
   external: ['@capacitor/core'],
-  plugins: [
-    nodeResolve()
-  ]
+  plugins: [nodeResolve()],
 };
