@@ -1,7 +1,6 @@
-# @darkedges/capacitor-native-webauthn
-# @adamjbradley/capacitor-native-webauthn@0.0.3
+# @adamjbradley/capacitor-native-webauthn@0.0.10
 
-PassKey
+PassKey update to React 18
 
 ## Install
 
