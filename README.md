@@ -1,6 +1,6 @@
-# @adamjbradley/capacitor-native-webauthn@0.0.10
+# @adamjbradley/capacitor-native-webauthn@0.0.9
 
-PassKey update to React 18
+PassKey update to support Capacitor 6.0
 
 ## Install
 
