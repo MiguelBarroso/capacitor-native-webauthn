@@ -1,15 +1,16 @@
-# @adamjbradley/capacitor-native-webauthn@0.0.9
+# @miguelbarroso/capacitor-native-webauthn@0.0.9
 
 PassKey update to support Capacitor 6.0
 
 ## Install
 
 ```bash
-npm install @adamjbradley/capacitor-native-webauthn
+npm install @miguelbarroso/capacitor-native-webauthn
 npx cap sync
 ```
 
 # Publish to NPM
+
 npm publish
 
 ## API
